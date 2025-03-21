@@ -8,11 +8,17 @@ use Illuminate\Support\Facades\Auth; // Thêm dòng này
 
 class CheckRole
 {
-    public function handle(Request $request, Closure $next, $role)
+    public function handle(Request $request, Closure $next, ...$roles)
     {
-        if (!Auth::check() || Auth::user()->role !== $role) { // Sửa thành Auth::check()
+        if (!Auth::check()) {
+            return redirect()->route('login');
+        }
+
+        $userRole = Auth::user()->role;
+        if (!in_array($userRole, $roles)) {
             abort(403, 'Bạn không có quyền truy cập trang này');
         }
+
         return $next($request);
     }
 }

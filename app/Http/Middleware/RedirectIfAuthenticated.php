@@ -1,5 +1,5 @@
 <?php
-
+// app/Http/Middleware/RedirectIfAuthenticated.php
 namespace App\Http\Middleware;
 
 use Closure;
@@ -14,7 +14,11 @@ class RedirectIfAuthenticated
 
         foreach ($guards as $guard) {
             if (Auth::guard($guard)->check()) {
-                return redirect('/home'); // Chuyển hướng mặc định
+                $role = Auth::user()->role;
+                if (in_array($role, ['admin', 'employee'])) {
+                    return redirect()->route('products.index');
+                }
+                return redirect()->route('user.products.index');
             }
         }
 

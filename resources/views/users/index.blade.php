@@ -1,9 +1,9 @@
+<!-- resources/views/users/index.blade.php -->
 <!DOCTYPE html>
 <html>
 
 <head>
-    <title>Danh sách sản phẩm</title>
-
+    <title>Quản lý tài khoản</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 
@@ -29,50 +29,38 @@
                 </div>
             </div>
         </nav>
+        <h1>Quản lý tài khoản người dùng</h1>
 
-        <h1>Danh sách sản phẩm</h1>
         @if (session('success'))
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            {{ session('success') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
+        <div class="alert alert-success">{{ session('success') }}</div>
         @endif
-        @auth
-        <a href="{{ route('products.create') }}" class="btn btn-primary mb-3">Thêm sản phẩm</a>
-        @endauth
-        <table class="table">
+
+        <table class="table table-bordered mt-3">
             <thead>
                 <tr>
                     <th>ID</th>
                     <th>Tên</th>
-                    <th>Mô tả</th>
-                    <th>Giá</th>
+                    <th>Email</th>
+                    <th>Role</th>
                     <th>Hành động</th>
                 </tr>
             </thead>
             <tbody>
-                @foreach ($products as $product)
+                @foreach ($users as $user)
                 <tr>
-                    <td>{{ $product->id }}</td>
-                    <td>{{ $product->name }}</td>
-                    <td>{{ $product->description }}</td>
-                    <td>{{ $product->price }}</td>
+                    <td>{{ $user->id }}</td>
+                    <td>{{ $user->name }}</td>
+                    <td>{{ $user->email }}</td>
+                    <td>{{ $user->role }}</td>
                     <td>
-                        @auth
-                        <a href="{{ route('products.edit', $product) }}" class="btn btn-warning">Sửa</a>
-                        <form action="{{ route('products.destroy', $product) }}" method="POST" style="display:inline;">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="btn btn-danger" onclick="return confirm('Bạn có chắc muốn xóa?')">Xóa</button>
-                        </form>
-                        @endauth
+                        <a href="{{ route('users.edit', $user->id) }}" class="btn btn-primary btn-sm">Chỉnh sửa</a>
                     </td>
                 </tr>
                 @endforeach
             </tbody>
         </table>
+        <a href="{{ route('home') }}" class="btn btn-secondary">Quay lại</a>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 
 </html>

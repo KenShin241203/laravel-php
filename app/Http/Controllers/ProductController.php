@@ -27,13 +27,31 @@ class ProductController extends Controller
     // Lưu sản phẩm mới
     public function store(Request $request)
     {
+        // Debug dữ liệu gửi lên
+        // dd($request->all());
+
         $request->validate([
-            'name' => 'required',
-            'price' => 'required|numeric',
+            'name' => 'required|string|max:255',
+            'price' => 'required|numeric|min:0',
+            'image' => 'nullable|image|max:2048',
         ]);
 
-        Product::create($request->all());
-        return redirect()->route('products.index')->with('success', 'Thêm sản phẩm thành công!');
+        $data = $request->only('name', 'description', 'price');
+
+        if ($request->hasFile('image')) {
+            // Debug file upload
+            // dd($request->file('image'));
+            $imagePath = $request->file('image')->store('products', 'public');
+            $data['image'] = $imagePath;
+        }
+
+        try {
+            Product::create($data);
+            return redirect()->route('products.index')->with('success', 'Sản phẩm đã được thêm!');
+        } catch (\Exception $e) {
+            // Hiển thị lỗi chi tiết
+            return redirect()->back()->withErrors(['error' => $e->getMessage()])->withInput();
+        }
     }
 
     // Hiển thị form sửa sản phẩm
@@ -43,15 +61,30 @@ class ProductController extends Controller
     }
 
     // Cập nhật sản phẩm
-    public function update(Request $request, Product $product)
+    public function update(Request $request, $id)
     {
         $request->validate([
-            'name' => 'required',
-            'price' => 'required|numeric',
+            'name' => 'required|string|max:255',
+            'price' => 'required|numeric|min:0',
+            'image' => 'nullable|image|max:2048', // Tối đa 2MB
         ]);
 
-        $product->update($request->all());
-        return redirect()->route('products.index')->with('success', 'Cập nhật sản phẩm thành công!');
+        $product = Product::findOrFail($id);
+        $data = $request->only('name', 'description', 'price');
+
+        if ($request->hasFile('image')) {
+            // Xóa ảnh cũ nếu có
+            if ($product->image) {
+                \Storage::disk('public')->delete($product->image);
+            }
+            // Lưu ảnh mới
+            $imagePath = $request->file('image')->store('products', 'public');
+            $data['image'] = $imagePath;
+        }
+
+        $product->update($data);
+
+        return redirect()->route('products.index')->with('success', 'Sản phẩm đã được cập nhật!');
     }
 
     // Xóa sản phẩm
